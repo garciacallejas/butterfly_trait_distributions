@@ -2,7 +2,7 @@
 
 This repository holds the code and data of the study "Beyond community-weighted means: quantifying trait distributions for detecting community assembly patterns". For more information see the publication: 
 
-xxx
+[LINK](https://www.biorxiv.org/content/10.1101/2024.12.18.629105v1)
 
 The raw count and abundance butterfly data that support the findings of this study are available from the European Butterfly Monitor Scheme (https://butterfly-monitoring.net/), or directly from each participating Butterfly Monitoring Scheme (https://www.catalanbms.org/en and https://ubms.creaf.cat/en) via a signed license agreement. These datasets are, therefore, not included in this repository. Data on abundance indexes and trait distributions is included in the /data folder. All results and figures from the paper can be derived from the included data, and are already stored in the /results folder.
 
