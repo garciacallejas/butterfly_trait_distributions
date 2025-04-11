@@ -274,6 +274,7 @@ bootstrap.metrics.ci <- bootstrap.metrics.manual %>%
   group_by(pool,year,trait) %>%
   summarise(
     mean = mean(.data$average),
+    sd_mean = sd(.data$average),
     ci_low_mean = get_ci(
       data = .data$average, sd_mult = sd_mult, ci = ci,
       which = "low", parametric = parametric
@@ -283,6 +284,7 @@ bootstrap.metrics.ci <- bootstrap.metrics.manual %>%
       which = "high", parametric = parametric
     ),
     sd = mean(.data$standard_deviation),
+    sd_sd = sd(.data$standard_deviation),
     ci_low_sd = get_ci(
       data = .data$standard_deviation, sd_mult = sd_mult, ci = ci,
       which = "low", parametric = parametric
@@ -292,6 +294,7 @@ bootstrap.metrics.ci <- bootstrap.metrics.manual %>%
       which = "high", parametric = parametric
     ),
     skew = mean(.data$skewness),
+    sd_skew = sd(.data$skewness),
     ci_low_skew = get_ci(
       data = .data$skewness, sd_mult = sd_mult, ci = ci,
       which = "low", parametric = parametric
@@ -301,6 +304,7 @@ bootstrap.metrics.ci <- bootstrap.metrics.manual %>%
       which = "high", parametric = parametric
     ),
     kurt = mean(.data$kurtosis),
+    sd_kurt = sd(.data$kurtosis),
     ci_low_kurt = get_ci(
       data = .data$kurtosis, sd_mult = sd_mult, ci = ci,
       which = "low", parametric = parametric
@@ -310,6 +314,7 @@ bootstrap.metrics.ci <- bootstrap.metrics.manual %>%
       which = "high", parametric = parametric
     ),
     rg = mean(.data$range),
+    sd_rg = sd(.data$range),
     ci_low_rg = get_ci(
       data = .data$range, sd_mult = sd_mult, ci = ci,
       which = "low", parametric = parametric
@@ -319,6 +324,7 @@ bootstrap.metrics.ci <- bootstrap.metrics.manual %>%
       which = "high", parametric = parametric
     ),
     md = mean(.data$multimodality),
+    sd_md = sd(.data$multimodality),
     ci_low_md = get_ci(
       data = .data$multimodality, sd_mult = sd_mult, ci = ci,
       which = "low", parametric = parametric
@@ -364,9 +370,17 @@ summarised_trait_dists_long_2 <- bootstrap.metrics.ci %>%
       metric == "rg" ~ ci_high_rg,
       metric == "md" ~ ci_high_md,
       # metric == "cvar" ~ ci_high_cvar
+    ),
+    sd = case_when(
+      metric == "mean" ~ sd_mean,
+      metric == "sd" ~ sd_sd,
+      metric == "skew" ~ sd_skew,
+      metric == "kurt" ~ sd_kurt,
+      metric == "rg" ~ sd_rg,
+      metric == "md" ~ sd_md,
     )
   ) %>%
-  select(pool, year, trait, metric, value, low, high)
+  select(pool, year, trait, metric, value, sd, low, high)
 
 summarised_trait_dists_long_2$metric[summarised_trait_dists_long_2$metric == "mean"] <- "average"
 summarised_trait_dists_long_2$metric[summarised_trait_dists_long_2$metric == "sd"] <- "standard_deviation"
@@ -375,6 +389,8 @@ summarised_trait_dists_long_2$metric[summarised_trait_dists_long_2$metric == "ku
 summarised_trait_dists_long_2$metric[summarised_trait_dists_long_2$metric == "rg"] <- "range"
 summarised_trait_dists_long_2$metric[summarised_trait_dists_long_2$metric == "md"] <- "multimodality"
 # summarised_trait_dists_long_2$metric[summarised_trait_dists_long_2$metric == "cvar"] <- "coef_variation"
+
+summarised_trait_dists_long_2$num_bootstrap_replicates <- 1000
 
 # coefficient of variation
 cv.df <- summarised_trait_dists_long_2 %>% filter(metric %in% c("average","standard_deviation","skewness","kurtosis","range","multimodality")) %>%
@@ -391,10 +407,38 @@ cv.df <- summarised_trait_dists_long_2 %>% filter(metric %in% c("average","stand
 # svti.sk.data <- subset(summarised_trait_dists_long_2, trait == "SVTI" & metric == "skewness")
 # svti.sk.data %>% group_by(pool) %>% summarise(avg = mean(value), sd = sd(value))
 # -------------------------------------------------------------------------
+# Skewness-kurtosis relationships
+
+dist.data.wide <- subset(summarised_trait_dists_long_2, trait %in% my.traits & metric %in% c("skewness","kurtosis","range")) %>%
+  pivot_wider(names_from = metric,values_from = c(value,low,high)) %>%
+  mutate(skewness_squared = value_skewness^2, low_skewness_squared = low_skewness^2, high_skewness_squared = high_skewness^2) %>%
+  rename(skewness = value_skewness, kurtosis = value_kurtosis, range = value_range) %>%
+  select(pool,year,trait,skewness,skewness_squared,kurtosis,range,low_skewness,low_skewness_squared,low_kurtosis,low_range,
+         high_skewness,high_skewness_squared,high_kurtosis,high_range)
+
+# -------------------------------------------------------------------------
+# obtain euclidean distance to boundary of each point
+
+# the boundary is given by S^2 + 1 = K (Gross 2021)
+dist.formula <- function(x,y){
+  abs(-x + y - 1)/sqrt(2)
+}
+
+dist.data.wide$dist.to.boundary <- dist.formula(dist.data.wide$skewness_squared,dist.data.wide$kurtosis)
+dist.data.wide <- dist.data.wide %>%
+  group_by(trait) %>%
+  mutate(norm_range = scales::rescale(range,to = c(0.01,0.99)))
+
+# highlight distributions from Fig 1 here as well
+dist.data.wide$highlight <- F
+dist.data.wide$highlight[which(dist.data.wide$year == 2019 &
+                                 dist.data.wide$trait %in% c("STI","SVTI"))] <- T
+# -------------------------------------------------------------------------
 
 write.csv2(trait.dist.df,"results/trait_distributions.csv",row.names = F)
 write.csv2(summarised_trait_dists_long_2, "results/trait_distributions_metrics.csv",row.names = F)
 write.csv2(cv.df,"results/trait_distributions_coefficient_of_variation.csv",row.names = F)
+write.csv2(dist.data.wide,"results/skewness_kurtosis_relationships.csv",row.names = F)
 
 # -------------------------------------------------------------------------
 # OLD CODE and tests/checks to be deleted eventually
