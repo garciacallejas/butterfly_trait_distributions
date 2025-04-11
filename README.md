@@ -1,5 +1,7 @@
 ### Trait distributions of butterfly communities
 
+[![DOI](https://zenodo.org/badge/901927664.svg)](https://doi.org/10.5281/zenodo.15197528)
+
 This repository holds the code and data of the study "Beyond community-weighted means: quantifying trait distributions for detecting community assembly patterns". For more information see the publication: 
 
 [LINK](https://www.biorxiv.org/content/10.1101/2024.12.18.629105v1)
