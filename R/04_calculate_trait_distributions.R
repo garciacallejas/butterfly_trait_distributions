@@ -410,7 +410,7 @@ cv.df <- summarised_trait_dists_long_2 %>% filter(metric %in% c("average","stand
 # Skewness-kurtosis relationships
 
 dist.data.wide <- subset(summarised_trait_dists_long_2, trait %in% my.traits & metric %in% c("skewness","kurtosis","range")) %>%
-  pivot_wider(names_from = metric,values_from = c(value,low,high)) %>%
+  pivot_wider(names_from = metric,values_from = c(value,sd,low,high)) %>%
   mutate(skewness_squared = value_skewness^2, low_skewness_squared = low_skewness^2, high_skewness_squared = high_skewness^2) %>%
   rename(skewness = value_skewness, kurtosis = value_kurtosis, range = value_range) %>%
   select(pool,year,trait,skewness,skewness_squared,kurtosis,range,low_skewness,low_skewness_squared,low_kurtosis,low_range,

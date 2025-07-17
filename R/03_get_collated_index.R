@@ -10,7 +10,7 @@
 # - s-index dataframe
 
 # OUTPUTS
-# - collated index list (dataframe?)
+# - collated index list
 
 # -------------------------------------------------------------------------
 # rm(list=ls())

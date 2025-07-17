@@ -29,8 +29,10 @@ dif.dist$sig.level[dif.dist$mann_whitney_pvalue < 0.05 & dif.dist$mann_whitney_p
 dif.dist$sig.level[dif.dist$mann_whitney_pvalue < 0.01 & dif.dist$mann_whitney_pvalue >= 0.001] <- "**"
 dif.dist$sig.level[dif.dist$mann_whitney_pvalue < 0.001] <- "***"
 
+# -------------------------------------------------------------------------
 # write.csv2(dif.dist,"results/distribution_differences.csv",row.names = F)
 
+# -------------------------------------------------------------------------
 # just to check these tests are doing what they should,
 # uncomment for a more explicit approach
 # for(i.year in my.years){

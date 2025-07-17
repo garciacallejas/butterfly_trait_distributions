@@ -9,11 +9,12 @@
 library(tidyverse)
 library(lmtest)
 library(ggeffects)
+library(patchwork)
 
 # -------------------------------------------------------------------------
 
 # read worked DB with sp list of failed and non-failed phenologies
-sp.w<-read.delim("data/sp_years_working.txt",sep = ";")
+sp.w <- read.delim("data/sp_years_working.txt",sep = ";")
 # head(sp.w)
 
 # read counts DBs and separate per scheme
@@ -85,7 +86,7 @@ robustsummary <- function(model) {
 
 # predict values for COUNT = [0 : max COUNT]
 # max(sp.w.c$COUNT,na.rm = T)
-my.new.db <- ggpredict(model, terms = c("COUNT[0:500]"), type = "re")
+my.new.db <- ggpredict(model, terms = c("COUNT[0:500]"), type = "fixed")
 # head(my.new.db)
 # put the intercept to start from zero:
 my.new.db$predicted2 <-round(my.new.db$predicted - 0.1123090, 4)
@@ -147,7 +148,7 @@ robustsummary <- function(model) {
 # robustsummary(model)
 
 # predict values for COUNT = [0 : max COUNT]
-my.new.db <- ggpredict(model, terms = c("COUNT[0:500]"), type = "re")
+my.new.db <- ggpredict(model, terms = c("COUNT[0:500]"), type = "fixed")
 # head(my.new.db)
 # put the intercept to start from zero:
 my.new.db$predicted2 <-round(my.new.db$predicted - 0.1123090, 4)
@@ -175,10 +176,11 @@ sp.w.u <- merge(sp.w.u, my.new.db[,c(1,7,4,5)], by.x = "COUNT", by.y = "x", all.
 sp.w.u <- sp.w.u %>% mutate(COL_INDEX =  case_when(
   is.na(COL_INDEX) ~ predicted2, TRUE ~ COL_INDEX ))
 
-
 ##### plot both #####
-# library(gridExtra)
-# grid.arrange(plot_model, plot_model.u, ncol=2)
+full.plot <- plot_model + plot_model.u
+ggsave("results/images/Predicted_Col_Indexes.pdf",full.plot,
+       device = cairo_pdf,
+       width = 8, height = 4,dpi = 300)
 
 ##### merge both DB  #####
 collated_index_corrected <- rbind(sp.w.c, sp.w.u)

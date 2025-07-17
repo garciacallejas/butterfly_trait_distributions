@@ -24,14 +24,38 @@ set.seed(218795)
 # CBMS as needed in rbms
 
 # CBMS transects
-c_transects <- read.csv2("data/medicy_transect.csv",sep=",") # this is the CBMS data
+c_transects <- read.csv2("data/transectos_CBMS_filtrados.csv",sep=",") # this is the CBMS data
 c_transects <- c_transects %>%
-  rename(SITE_ID = IDitin, altitude = altura)
+  rename(altitude = ALTITUDE) %>%
+  dplyr::select(SITE_ID, altitude, lat, lng)
+
+# filter by altitude not higher than the urban transects
 c_transects$altitude <- as.numeric(c_transects$altitude)
-max(c_transects$altitude)
-# subset < 600m
 c_transects <- c_transects %>%
   filter(altitude <= 600)
+
+# -------------------------------------------------------------------------
+# c_transectsf$lat <- as.numeric(c_transectsf$lat)
+# c_transectsf$lng <- as.numeric(c_transectsf$lng)
+# 
+# c_transects$lat <- as.numeric(c_transects$lat)
+# c_transects$lng <- as.numeric(c_transects$lng)
+# 
+# bcn.shp <- sf::st_read("data/archivedwl-90/bcn_UTM_v1.shp")
+# bcn.shp.wgs84 <- bcn.shp %>% sf::st_transform(4326)
+# 
+# ggplot2::ggplot(data = bcn.shp.wgs84) +
+#   ggplot2::geom_sf() +
+#   geom_point(data = c_transects, aes(x = lng, y = lat), color = "darkgreen") + 
+#   geom_point(data = c_transectsf, aes(x = lng, y = lat), color = "red") +
+#   ggplot2::theme(
+#     panel.background = ggplot2::element_blank(),
+#     axis.text = ggplot2::element_blank(),
+#     axis.title = ggplot2::element_blank(),
+#     axis.ticks = ggplot2::element_blank(),
+#     legend.position = "none"
+#   )
+
 
 # CBMS counts
 c_counts <- read.csv2("data/medicy_counts.csv",sep=";") # CBMS data
@@ -165,7 +189,6 @@ ts_season_visit <- rbms::ts_monit_site(m_visit = all_visits,ts_season = ts_seaso
 phenology.list <- list()
 
 # Phenology Transects_Walks:
-
 
 for(i.sp in 1:length(all.sp)){
   

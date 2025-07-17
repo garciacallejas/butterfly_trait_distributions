@@ -201,16 +201,20 @@ cv.df$metric <- factor(cv.df$metric,levels = c("average","standard_deviation","s
 cv.df$trait <- factor(cv.df$trait, levels = c("HSI","SSI","STI","SVTI","TAO","WI"))
 cv.df$pool <- factor(cv.df$pool, levels = my.pool)
 
+# TEST
+cv.df$cv2 <- abs(cv.df$sdev)/abs(cv.df$avg)
+cv.df$diff <- abs(cv.df$cv2 - cv.df$cv)
+
 pd <- 0.5
 cv.plot <- ggplot(cv.df) + 
-  geom_point(aes(x = cv, y = trait, fill = pool), 
+  geom_point(aes(x = cv2, y = trait, fill = pool), 
              position=position_dodge(.2),
              shape = 21, 
              size = 3
              ) + 
   # geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
   scale_y_discrete(limits = rev(levels(cv.df$trait))) + 
-  xlim(0,1) +
+  # xlim(0,1) +
   xlab("coefficient of variation") +
   scale_fill_OkabeIto() +
   facet_grid(rows = vars(metric)) +
