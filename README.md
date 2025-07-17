@@ -1,5 +1,7 @@
 ### Trait distributions of butterfly communities
 
+[![DOI](https://zenodo.org/badge/901927664.svg)](https://doi.org/10.5281/zenodo.15197528)
+
 This repository holds the code and data of the study "Beyond community-weighted means: quantifying trait distributions for detecting community assembly patterns". For more information see the publication: 
 
 [LINK](https://www.biorxiv.org/content/10.1101/2024.12.18.629105v1)
@@ -10,7 +12,7 @@ The raw count and abundance butterfly data that support the findings of this stu
 
 1) Scripts with prefix 01-03 are included for completeness, but will not work out of the box as they need the raw data not included in the repository. These scripts generate phenology curves, s-index, and collated index for the butterfly species analysed.
 2) Script with prefix 04 calculates the trait distributions for each trait, species, and community.
-3) Script with prefix 05 plots and analyses trait distributions.
+3) Script with prefix 05-06 analyse and plot trait distributions.
 
 These scripts need a few R packages to run, see the relevant scripts for them. There are further auxiliary files with specific functions or supplementary information that are also included. 
 
