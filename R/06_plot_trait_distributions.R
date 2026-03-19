@@ -230,6 +230,7 @@ cv.plot <- ggplot(cv.df) +
 # cv.plot
 
 # -------------------------------------------------------------------------
+
 ggsave("results/images/trait_metrics.pdf",metrics.plot,
        device = cairo_pdf,
        width = 15, height = 11,dpi = 300)
