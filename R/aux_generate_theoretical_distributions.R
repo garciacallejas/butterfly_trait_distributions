@@ -12,7 +12,7 @@ variance.value <- sd.value^2
 
 num.observations <- 100000
 
-# idea: a convenient skewed distribution to work with is the gamma. 
+# A convenient skewed distribution to work with is the gamma. 
 # It has two parameters, shape and scale. 
 # The mean is shape*scale and the variance is shape*scale*scale. 
 # So to match the mean and variance, 

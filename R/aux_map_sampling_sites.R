@@ -9,7 +9,11 @@
 # OUTPUTS
 # - figure (bcn_urb_map)
 
-# NOTE: this code is adapted from a script by Pau Colom. It can be tweaked
+# NOTE: This script will not work directly, as it requires data that is 
+# not available in the open repository (the folder "map_data"). See the section on "code and data availability" 
+# of the main text for details.
+
+# NOTE: 2 this code is adapted from a script by Pau Colom. It can be tweaked
 # to plot more complex figures, e.g. with land uses or built-up surface in the background
 # but these are not needed here, as the objective is to show the spatial arrangement of
 # sampling points
@@ -23,7 +27,7 @@ library(osmdata)
 library(viridis)
 library(ggspatial)
 library(terra)
-
+library(patchwork)
 # -------------------------------------------------------------------------
 # Load data ---
 
@@ -31,22 +35,22 @@ library(terra)
 # is not uploaded to ZENODO . See the README for details on files uploaded and permissions
 
 # The path to the data used is set here:
-data_path <- "~/trabajo/projects/BCN/butterfly_community_traits/"
+data_path <- "~/trabajo/projects/BCN/butterfly_trait_distributions/"
 
 # rasters
 lc_raster <- rast(paste0(data_path,"data/map_data/ESA_WorldCover_10m_2021_V200_N39E000_Map.tif"))
 ghsl <- raster(paste0(data_path,"data/map_data/GHS_BUILT_S_E2020_GLOBE_R2023A_4326_3ss_V1_0_R5_C19.tif"))
 
 # sites
-all_sites <- read.csv2(paste0(data_path,"data/all_visits.txt")) %>% dplyr::select(SITE_ID,SCHEME) %>% 
+all_sites <- read.csv2(paste0(data_path,"data/map_data/all_visits.txt")) %>% dplyr::select(SITE_ID,SCHEME) %>% 
   unique
 
-cbms_coords <- read.csv2(paste0(data_path,"data/transectos_CBMS_filtrados.csv"),sep=",") %>%
+cbms_coords <- read.csv2(paste0(data_path,"data/map_data/transectos_CBMS_filtrados.csv"),sep=",") %>%
   dplyr::select(SITE_ID,lat,lng)
 names(cbms_coords) <- c("SITE_ID","latitude","longitude")
 cbms_coords$SITE_ID <- as.character(cbms_coords$SITE_ID)
 
-ubms_coords <- read.csv2(paste0(data_path,"data/ubms_sites.csv")) %>%
+ubms_coords <- read.csv2(paste0(data_path,"data/map_data/ubms_sites.csv")) %>%
   dplyr::select(transect_id, transect_latitude, transect_longitude)
 names(ubms_coords) <- c("SITE_ID","latitude","longitude")
 ubms_coords <- ubms_coords[grepl("_A", ubms_coords$SITE_ID),]
@@ -179,7 +183,7 @@ map_urb_bcn <- ggplot() +
     breaks = seq(41, 42, by = 0.5),limits = c(41.18,42)
   )+
   labs(x = "Longitude", y = "Latitude") +
-  theme_minimal(base_family = "Garamond", base_size = 18) +
+  theme_minimal(base_family = "Garamond", base_size = 16) +
   theme(
     panel.grid = element_blank(),
     panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.8),
@@ -187,11 +191,11 @@ map_urb_bcn <- ggplot() +
     axis.ticks = element_line(colour = "black"),
     axis.text = element_text(family = "Garamond", size = 14),
     axis.title = element_text(family = "Garamond", size = 18),
-    legend.position=c(.15, .9),
-    legend.text = element_text(family = "Garamond", size = 14),
-    legend.title = element_text(family = "Garamond", size = 16)
+    legend.position=c(.13, .88),
+    legend.text = element_text(family = "Garamond", size = 12),
+    legend.title = element_text(family = "Garamond", size = 14)
   ) +
-  guides(color = guide_legend(override.aes = list(size = 5))) +
+  guides(color = guide_legend(override.aes = list(size = 4))) +
   annotation_scale(
     location = "tr", 
     width_hint = 0.25,
@@ -204,17 +208,19 @@ map_urb_bcn <- ggplot() +
 # -------------------------------------------------------------------------
 # zoom over the city
 map_city <- ggplot() +
-  geom_sf(data = bcn_boundary, fill = NA, color = "grey30", size = 1) +
+  geom_sf(data = bcn_boundary, fill = NA, color = "grey30", linewidth = .4) +
   # geom_raster(data = water_df_bcn, aes(x = x, y = y), fill = "white", alpha = 1) +  # <-- water layer
   # geom_sf(data = bcn_buffer_wgs, fill = NA, size = .7) +
-  geom_sf(data = subset(sites_buffer_bcn, context == "filtered"), color = "darkred", size = 1.5, alpha = 0.9) +
-  lims(x = c(2.05,2.3), y = c(41.3,41.5)) +
-  # scale_x_continuous(
-  #   breaks = seq(1.5, 3, by = 0.5)  
-  # ) +
-  # scale_y_continuous(
-  #   breaks = seq(41, 42, by = 0.5),limits = c(41.18,42)
-  # )+
+  geom_sf(data = subset(sites_buffer_bcn, context == "filtered"), color = "darkred", size = 1.8, alpha = 0.9) +
+  lims(x = c(2.05,2.24), y = c(41.32,41.47)) +
+  scale_x_continuous(
+    # breaks = seq(1.5, 3, by = 0.5)
+    breaks = NULL
+  ) +
+  scale_y_continuous(
+    # breaks = seq(41, 42, by = 0.5),limits = c(41.18,42)
+    breaks = NULL
+  )+
   # labs(x = "Longitude", y = "Latitude") +
   theme_minimal(base_family = "Garamond", base_size = 18) +
   theme(
@@ -237,15 +243,18 @@ map_city <- ggplot() +
   # ) + 
   NULL
 
-map_city
+# map_city
+
+map_full <- map_urb_bcn + map_city
+
 # -------------------------------------------------------------------------
 # store
 
 # ggsave("results/images/bcn_urb_map.pdf",
-#        map_urb_bcn,
+#        map_full,
 #        device = cairo_pdf,
-#        width = 8,
-#        height = 6,
+#        width = 10,
+#        height = 5,
 #        dpi = 300,
 #        bg = "white")
 
