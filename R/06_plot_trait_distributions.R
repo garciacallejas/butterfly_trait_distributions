@@ -79,10 +79,24 @@ example.dist.plot <- ggplot(my.data) +
   guides(fill = guide_legend(position = "inside", title = NULL)) + # place legend inside plot
   theme(legend.text = element_text(size = 7.5),
         legend.key.spacing.y = unit(.2, "pt"),
-        legend.box.margin = unit(0,"pt"),
+        #legend.box.margin = unit(0,"pt"),
         legend.justification.inside = c(.39, .994)) + # top right
   
   NULL
+
+# for the graphical abstract
+graphical.abstract.dist <- ggplot(subset(my.data, trait == "SVTI")) + 
+  geom_histogram(aes(x = value, fill = pool)) +
+  ggh4x::facet_grid2(pool~.) +
+  labs(x = "Trait value", y = "Count") +
+  scale_fill_manual(values = c("grey15","darkred")) +
+  theme_bw() + 
+  theme(strip.background = element_blank(), 
+        strip.text.y = element_blank(),
+        legend.position = "none") +
+  NULL
+
+# graphical.abstract.dist
 
 # this is Table 1
 my.example.metrics <- subset(trait.metrics.dist, year == 2019 & trait %in% c("STI","SVTI"))
@@ -230,6 +244,11 @@ cv.plot <- ggplot(cv.df) +
 # cv.plot
 
 # -------------------------------------------------------------------------
+
+ggsave("results/images/graphical_abstract_distributions.pdf",graphical.abstract.dist,
+       device = cairo_pdf,
+       width = 5, height = 4,dpi = 300)
+
 
 ggsave("results/images/trait_metrics.pdf",metrics.plot,
        device = cairo_pdf,
